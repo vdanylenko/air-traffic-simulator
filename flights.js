@@ -1,45 +1,61 @@
 const flights = require('./schedule.json');
 const airports = require('./airports.json');
 
-const AIRPLANE_SPEED = 10000;
+const AIRPLANE_SPEED = 15000;
 const calculateDistance = function (airport1, airport2) {
     // Extract the latitude and longitude coordinates of the first airport
     const lat1 = airport1.coordinates.latitude;
     const lon1 = airport1.coordinates.longitude;
 
-
     // Extract the latitude and longitude coordinates of the second airport
     const lat2 = airport2.coordinates.latitude;
     const lon2 = airport2.coordinates.longitude;
 
-
     // Radius of the Earth in meters
     const R = 6371e3;
-
 
     // Convert latitude from degrees to radians
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
 
-
     // Calculate the differences in latitude and longitude in radians
     const Δφ = (lat2 - lat1) * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
-
 
     // Apply the Haversine formula to calculate the great-circle distance
     const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
         Math.cos(φ1) * Math.cos(φ2) *
         Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
 
-
     // Calculate the angular distance in radians
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
+    // Calculate the distance in meters
+    const distance = R * c;
 
-    // Calculate and return the distance in meters
-    return R * c;
-}
+    // Calculate the initial bearing from airport1 to airport2
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) -
+        Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    const θ = Math.atan2(y, x);
+    const bearing = (θ * 180 / Math.PI + 360) % 360; // Convert from radians to degrees
+
+    // Function to get the cardinal direction
+    const getCardinalDirection = (degrees) => {
+        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const idx = Math.round(degrees / 45) % 8;
+        return directions[idx] || 'N';
+    };
+
+    // Get the cardinal direction
+    const direction = getCardinalDirection(bearing);
+
+    // Return both the distance and the direction
+    return {
+        distance: distance,
+        direction: direction
+    };
+};
 
 const scheduleFlight = function (flight) {
     // get current time
@@ -50,7 +66,10 @@ const scheduleFlight = function (flight) {
     const destinationAirport = airports[flight.destinationAirport];
 
     // get the distance between the airports
-    const distance = calculateDistance(departureAirport, destinationAirport);
+    const res = calculateDistance(departureAirport, destinationAirport)
+
+    const distance = res.distance;
+    const direction = res.direction;
 
     // get flight departure time
     const departureTime = new Date();
@@ -80,6 +99,7 @@ const scheduleFlight = function (flight) {
     // console.log({lat: currentPosition.latitude, lon: currentPosition.longitude})
     return ({
         flight,
+        direction: direction,
         status: 'in flight',
         coordinates: {lat: currentPosition.latitude, lon: currentPosition.longitude},
         timestamp: Date.now()
