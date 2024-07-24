@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aircraft positions</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="css/main.css">
     <style>
         #map {
             height: 100vh;
@@ -16,7 +17,7 @@
 <div id="map"></div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    const map = L.map('map').setView([51.505, -0.09], 3);
+    const map = L.map('map').setView([51.505, 0.00], 3);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -36,9 +37,10 @@
                     map.removeLayer(marker)
                 });
                 flights.forEach(flight => {
+                    // console.log("!" + flight.direction)
                     const airplaneIcon = L.icon({
-                        iconUrl: 'airplane.png',
-                        iconSize: [32, 32],
+                        iconUrl: 'img/airplane_'+ flight.direction +'.svg',
+                        iconSize: [20, 20],
                         iconAnchor: [16, 16],
                         popupAnchor: [0, -16]
                     });
