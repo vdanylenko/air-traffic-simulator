@@ -1,7 +1,7 @@
 const flights = require('./schedule.json');
 const airports = require('./airports.json');
 
-const AIRPLANE_SPEED = 15000;
+const AIRPLANE_SPEED = 10000;
 const calculateDistance = function (airport1, airport2) {
     // Extract the latitude and longitude coordinates of the first airport
     const lat1 = airport1.coordinates.latitude;
@@ -40,20 +40,10 @@ const calculateDistance = function (airport1, airport2) {
     const θ = Math.atan2(y, x);
     const bearing = (θ * 180 / Math.PI + 360) % 360; // Convert from radians to degrees
 
-    // Function to get the cardinal direction
-    const getCardinalDirection = (degrees) => {
-        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-        const idx = Math.round(degrees / 45) % 8;
-        return directions[idx] || 'N';
-    };
-
-    // Get the cardinal direction
-    const direction = getCardinalDirection(bearing);
-
     // Return both the distance and the direction
     return {
         distance: distance,
-        direction: direction
+        direction: bearing
     };
 };
 
